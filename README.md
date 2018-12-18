@@ -1,9 +1,14 @@
 PEARL
 =============================
+
 data
+
 |------	heart_failure/
+
 |------	mimic3/: 
-		./EHR/interpretable_healthcare/mimicIII2/data
+
+
+./EHR/interpretable_healthcare/mimicIII2/data
 
 
 
