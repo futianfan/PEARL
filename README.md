@@ -1,6 +1,4 @@
-		PEARL
-
-in Pytorch
+PEARL
 =============================
 data/
 	heart_failure/
