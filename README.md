@@ -1,7 +1,7 @@
 PEARL
 =============================
 
-data
+data/
 
 |------	heart_failure/
 
