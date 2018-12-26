@@ -254,8 +254,12 @@ class Weighted_Post_Prototype_RCNN_L2(Post_Prototype_RCNN_L2):
 		#X1 = torch.sqrt(X1)
 		assert (not torch.isnan(X1).any()) and (not torch.isinf(X1).any())
 		#print(X1)
-		weight = X1.sum(1)	### bs, 1
-		##weight = 1 / weight
+		#weight = X1.sum(1)	### bs, 1
+		#weight = X1.max(1)
+		weight = X1.min(1)[0]
+		#weight = weight.sqrt()
+		assert (not torch.isnan(weight).any()) and (not torch.isinf(weight).any())
+		weight = 1 / weight
 		return list(weight.data.numpy())
 
 

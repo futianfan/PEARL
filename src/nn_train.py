@@ -5,8 +5,8 @@ import torch.nn.functional as F
 import numpy as np 
 from sklearn.metrics import roc_auc_score
 from time import time
-torch.manual_seed(4)
-np.random.seed(3)
+torch.manual_seed(6) ### torch, np 2, 1
+np.random.seed(7)
 ## torch 3, np 1
 def evaluate(rnn_model, testData, embedding):
 	testData.restart()
@@ -220,7 +220,7 @@ def normalize_weight(weight_lst, upper, lower):
 	mu = sum(weight_lst) / len(weight_lst)
 	weight0 = [i / mu for i in weight_lst]
 	f = lambda x:max(min(x,upper),lower)
-	#weight0 = list(map(f,weight0))
+	weight0 = list(map(f,weight0))
 	return weight0
 
 def train_weighted_post_prototype(assignment):
