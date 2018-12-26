@@ -279,7 +279,6 @@ if __name__ == '__main__':
 		#train_post_prototype(assignment)
 		reweight = train_weighted_post_prototype(assignment)
 
-
 	#train_Prototype_RCNN(assignment)
 	#train_weighted_Prototype_RCNN(assignment)
 

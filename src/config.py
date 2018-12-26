@@ -74,8 +74,8 @@ def get_prototype_config():
 
 	config['train_iter'] = 100 ## int(2e3)
 	config['every_iter'] = 20
-	config['upper'] = 10
-	config['lower'] = 0.1
+	config['upper'] = 3
+	config['lower'] = 1.0 / 3
 
 
 	### Decision Tree
