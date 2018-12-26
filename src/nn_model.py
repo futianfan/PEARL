@@ -252,12 +252,11 @@ class Weighted_Post_Prototype_RCNN_L2(Post_Prototype_RCNN_L2):
 	def measure_similarity(self, X, weight = None):
 		X1 = self.forward_prototype(X)
 		#X1 = torch.sqrt(X1)
+		assert (not torch.isnan(X1).any()) and (not torch.isinf(X1).any())
+		#print(X1)
 		weight = X1.sum(1)	### bs, 1
-		weight = 1 / weight
+		##weight = 1 / weight
 		return list(weight.data.numpy())
-
-
-
 
 
 

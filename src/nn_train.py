@@ -217,9 +217,10 @@ def train_post_prototype(assignment):
 
 def normalize_weight(weight_lst, upper, lower):
 	## average
-	weight0 = [i / sum(weight_lst) for i in weight_lst]
+	mu = sum(weight_lst) / len(weight_lst)
+	weight0 = [i / mu for i in weight_lst]
 	f = lambda x:max(min(x,upper),lower)
-	weight0 = list(map(f,weight0))
+	#weight0 = list(map(f,weight0))
 	return weight0
 
 def train_weighted_post_prototype(assignment):
@@ -259,7 +260,9 @@ def train_weighted_post_prototype(assignment):
 	for i in range(trainData.batch_number):
 		feat, label, weight = trainData.next()
 		reweight.extend(nn.measure_similarity(feat))
+	#print(reweight)
 	reweight = normalize_weight(reweight, config['upper'], config['lower'])
+	#print(reweight)
 	return reweight
 
 
