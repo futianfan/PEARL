@@ -3,12 +3,16 @@ from collections import defaultdict
 import torch
 from torch import nn
 from torch.autograd import Variable
+import tensorflow as tf 
 
 #torch.manual_seed(3)
 #np.random.seed(0)
 ### to do, zero-padding + embedding 
 
 class Sequence_Data(object):
+	"""
+		Pytorch; med2vec + RCNN
+	"""
 	def __init__(self, is_train = True, **config):
 		super(Sequence_Data, self).__init__()
 		self.max_length = config['max_length']
@@ -106,6 +110,47 @@ def embed_file_2_embed_mat(embed_file, word_size):
 	embed_mat = torch.FloatTensor(embed_mat)
 	embedding = nn.Embedding.from_pretrained(embed_mat)
 	return embedding
+
+
+def _embed_file_2_numpy_embed_mat(embed_file, word_size):
+	with open(embed_file, 'r') as fin:
+		lines = fin.readlines()[1:]
+	embed_dim = len(lines[0].strip().split()) - 1
+	assert embed_dim == 100 
+	embed_mat = np.zeros((word_size, embed_dim), dtype = np.float)
+	embed_dict = defaultdict(lambda: np.zeros(embed_dim))
+	for line in lines:
+		embed_dict[int(line.split()[0])] = np.array(line.strip().split()[1:]) 
+	for i in range(word_size):
+		embed_mat[i,:] = embed_dict[i]
+	return embed_mat
+
+
+class TF_Sequence_Data(Sequence_Data):
+	"""
+		for tensorflow; med2vec + RCNN; 
+		use tensorflow's embedding_lookup() function
+	"""
+	def next(self, tf_embedding): 
+		### tf_embedding can be np.array
+		bgn, endn = self.batch_id * self.batch_size, (self.batch_id+1) * self.batch_size 
+		self.batch_id += 1			
+		if self.batch_id == self.batch_num:		
+			self.batch_id = 0 ## random.shuffle 
+		seq = self.sequence[bgn:endn]
+		for i in seq:
+			i.extend([0] * (self.max_length - len(i)))
+		seq_embed = tf.nn.embedding_lookup(params = tf_embedding, ids = seq)
+
+		#return self.label[bgn:endn], self.sequence[bgn:endn], self.timestamp[bgn:endn]
+		return seq_embed, self.sequence_len[bgn:endn], self.label[bgn:endn]
+		###		tensor, list,  list 		
+
+	def get_all(self, tf_embedding):
+		pass 
+
+
+
 
 
 class Weight_Sequence_Data(Sequence_Data):		### for weight NN 
@@ -207,7 +252,15 @@ class Weighted_Post_Data(Post_Data):
 		return feat, lab, self.weight_lst
 
 
+
+
+
+
+
 if __name__ == '__main__':
+
+	""" 
+	##### pytorch
 	from config import get_RCNN_config
 	config = get_RCNN_config()
 	embedding = embed_file_2_embed_mat(config['embed_file'], config['admis_dim'])
@@ -221,6 +274,21 @@ if __name__ == '__main__':
 		#print(i)
 		#print(seq_len)
 		#print(seq_embed.shape)
+	"""
+
+
+	##### tensorflow 
+	from config import get_RCNN_config
+	config = get_RCNN_config()
+	embedding = _embed_file_2_numpy_embed_mat(config['embed_file'], config['admis_dim'])
+	trainData = TF_Sequence_Data(is_train = True, **config)
+	for i in range(config['train_iter']):
+		seq_embed, seq_len, label = trainData.next(embedding)
+		print(seq_embed.get_shape().as_list())			
+
+
+
+
 	pass
 
 
