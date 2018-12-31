@@ -24,7 +24,7 @@ def evaluate(rnn_model, testData, embedding):
 
 def train_RCNN():
 	from config import get_RCNN_config
-	from nn_model import RCNN 
+	from model_torch import RCNN 
 	from stream import embed_file_2_embed_mat, Sequence_Data
 	config = get_RCNN_config()
 
@@ -83,7 +83,7 @@ def train_RCNN():
 
 def train_Prototype_RCNN(assignment = None):
 	from config import get_RCNN_config
-	from nn_model import Prototype_RCNN , Prototype_RCNN_L2
+	from model_torch import Prototype_RCNN , Prototype_RCNN_L2
 	from stream import embed_file_2_embed_mat, Sequence_Data
 	config = get_RCNN_config()
 	#### data prepare 
@@ -130,7 +130,7 @@ def decision_tree_learning():
 
 def train_weighted_Prototype_RCNN(assignment = None):
 	from config import get_RCNN_config
-	from nn_model import Prototype_RCNN_weighted
+	from model_torch import Prototype_RCNN_weighted
 	from stream import embed_file_2_embed_mat, Weight_Sequence_Data
 
 	config = get_RCNN_config()
@@ -185,7 +185,7 @@ def post_evaluate(testFeature, testLabel, nn, **config):
 
 def train_post_prototype(assignment):
 	from config import get_prototype_config
-	from nn_model import Post_Prototype_RCNN_L2
+	from model_torch import Post_Prototype_RCNN_L2
 	from stream import Post_Data
 	config = get_prototype_config()
 	## 1. data prepare
@@ -225,7 +225,7 @@ def normalize_weight(weight_lst, upper, lower):
 
 def train_weighted_post_prototype(assignment):
 	from config import get_prototype_config
-	from nn_model import Weighted_Post_Prototype_RCNN_L2
+	from model_torch import Weighted_Post_Prototype_RCNN_L2
 	from stream import Weighted_Post_Data
 	config = get_prototype_config()
 	every_iter = config['every_iter'] 
