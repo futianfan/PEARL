@@ -132,7 +132,7 @@ class TF_Sequence_Data(Sequence_Data):
 		use tensorflow's embedding_lookup() function
 	"""
 	def next(self, tf_embedding): 
-		### tf_embedding can be np.array
+		### tf_embedding can be np.array 
 		bgn, endn = self.batch_id * self.batch_size, (self.batch_id+1) * self.batch_size 
 		self.batch_id += 1			
 		if self.batch_id == self.batch_num:		
@@ -140,8 +140,8 @@ class TF_Sequence_Data(Sequence_Data):
 		seq = self.sequence[bgn:endn]
 		for i in seq:
 			i.extend([0] * (self.max_length - len(i)))
-		seq_embed = tf.nn.embedding_lookup(params = tf_embedding, ids = seq)
-
+		#seq_embed = tf.nn.embedding_lookup(params = tf_embedding, ids = seq)
+		seq_embed = seq 
 		#return self.label[bgn:endn], self.sequence[bgn:endn], self.timestamp[bgn:endn]
 		return seq_embed, self.sequence_len[bgn:endn], self.label[bgn:endn]
 		###		tensor, list,  list 		

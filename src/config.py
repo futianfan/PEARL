@@ -26,6 +26,7 @@ def get_RCNN_config():
 	config['cnn_stride'] = 1 
 	config['cnn_out_channel'] = 150
 	config['maxpool_size'] = 3
+	config['maxpool_stride'] = 1
 	config['rnn_hidden_size'] = 50 
 	config['rnn_num_layer'] = 1
 	config['batch_first']  = True
