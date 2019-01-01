@@ -38,7 +38,6 @@ class Rcnn_Base(object):
 	"""
 	def __init__(self, **config):
 		'''	###  hyperparameter
-
 				config['new_train_file'] = os.path.join(config['HF_folder'], 'train.npy')
 				config['new_test_file'] = os.path.join(config['HF_folder'], 'test.npy')
 
@@ -152,11 +151,61 @@ class Rcnn_Base(object):
 
 
 class Weighted_Rcnn(Rcnn_Base):
-	pass 
+	"""
+	weighted, prototype, prototype_loss
+	""" 
+	def __init__(self, **config):
+		self.__dict__.update(config)
+		self.embed_mat = _embed_file_2_numpy_embed_mat(config['embed_file'], config['admis_dim'])
+		self._build()
+		self._open_session()		
+
+	def _build(self):
+		### placeholder
+		self._build_placeholder()
+		### forward: RCNN
+		self._build_rcnn()
+		### full-connect for classify
+		self._build_classify()
+		### train_Op
+		self.train_op = tf.train.GradientDescentOptimizer(learning_rate=self.LR).minimize(self.classify_loss)
+
+	def _build_placeholder(self):
+		Rcnn_Base._build_placeholder(self)
+		self.weight = tf.placeholder(dtype = tf.float32, shape = [None])
+
+	def _build_classify(self):
+		weight_fc = tf.Variable(tf.random_normal(shape = [self.rnn_hidden_size, self.num_class]), dtype = tf.float32)
+		bias_fc = tf.Variable(tf.zeros(shape = self.num_class), dtype = tf.float32)
+		self.output_logits = tf.matmul(self.rnn_outputs, weight_fc) + bias_fc
+		self.output_softmax = tf.nn.softmax(self.output_logits, axis = 1)
+		self.classify_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
+										labels=self.y, 
+										logits=self.output_logits) \
+										* self.weight \
+		)
+
+	def train(self, X, Y_1d, seqlen, weight):
+		Y_2d = _1dlabel_to_2dlabel(Y_1d)
+		loss, _ = self.sess.run([self.classify_loss, self.train_op], \
+			feed_dict = {self.seqlst:X, self.y:Y_2d, self.seqlen:seqlen, self.weight:weight})
+		return loss 
+
+	def evaluate(self, X, seqlen):
+		batch_size = len(seqlen)
+		weight = [1.0] * batch_size
+		return self.sess.run([self.output_softmax], \
+			feed_dict = {self.seqlst:X, self.seqlen:seqlen, self.weight:weight})		
+
 
 
 class Rcnn_Prototype(Rcnn_Base):
-	pass 
+
+	def _build_prototype(self):
+
+		self.prototype_loss = 0
+		
+
 
 
 if __name__ == '__main__':

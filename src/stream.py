@@ -149,6 +149,28 @@ class TF_Sequence_Data(Sequence_Data):
 	def get_all(self, tf_embedding):
 		pass 
 
+class TF_weighted_Sequence_Data(TF_Sequence_Data):
+	def __init__(self, is_train = True, **config):
+		TF_Sequence_Data.__init__(self, is_train, **config)
+		### initial weight 
+		self.weight_file = config['weight_file'] 
+		if self.weight_file == '':
+			self._weight = [1.0] * self.total_num
+
+	@property
+	def weight(self):
+		return self._weight
+
+	@weight.setter
+	def weight(self, weight):
+		self._weight = weight
+
+
+	def next(self):
+		bgn, endn = self.batch_id * self.batch_size, (self.batch_id+1) * self.batch_size 
+		weight = self._weight[bgn:endn]
+		seq_embed, seqlen, label = TF_Sequence_Data.next(self)
+		return seq_embed, seqlen, label, weight 
 
 
 
