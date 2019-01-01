@@ -142,6 +142,11 @@ class Rcnn_Base(object):
 			feed_dict = {self.seqlst:X, self.y:Y_2d, self.seqlen:seqlen})
 		return loss 
 
+	def evaluate(self, X, seqlen):
+		return self.sess.run([self.output_softmax], \
+			feed_dict = {self.seqlst:X, self.seqlen:seqlen})
+
+
 
 
 

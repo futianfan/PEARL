@@ -1,22 +1,41 @@
 import tensorflow as tf
 
 
+def test(model, All_data):
+	from sklearn.metrics import roc_auc_score
+	batch_num = All_data.batch_number
+	label_all = []
+	predict_all = [] 
+	for i in range(batch_num):
+		next_data = All_data.next()
+		data, data_len, label = next_data[0], next_data[1], next_data[2]
+		output_prob = model.evaluate(data, data_len)
+		output_prob = output_prob[0]
+		output_prob = [i[1] for i in output_prob]
+		label_all.extend(label)
+		predict_all.extend(output_prob)
+	return roc_auc_score(label_all, predict_all)
 
 def train_rcnn():
 	from config import get_RCNN_config
-	from stream import TF_Sequence_Data, _embed_file_2_numpy_embed_mat 
+	from stream import TF_Sequence_Data 
 	from model_tf import Rcnn_Base
 	config = get_RCNN_config()
-	embedding = _embed_file_2_numpy_embed_mat(config['embed_file'], config['admis_dim'])
 	trainData = TF_Sequence_Data(is_train = True, **config)
+	TestData = TF_Sequence_Data(is_train = False, **config)
 	rcnn_base = Rcnn_Base(**config)
 
+
+	batch_num = trainData.batch_number
+	total_loss = 0
 	for i in range(config['train_iter']):
-		seq_embed, seq_len, label = trainData.next(embedding)
+		seq_embed, seq_len, label = trainData.next()
 		loss = rcnn_base.train(seq_embed, label, seq_len)
-		print(loss)
-
-
+		total_loss += loss 
+		if i > 0 and i % batch_num == 0:
+			auc = test(rcnn_base, TestData)
+			print('Loss: {}, test AUC {}.'.format(total_loss, auc))
+			total_loss = 0 
 
 
 if __name__ == '__main__':

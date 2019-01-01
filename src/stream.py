@@ -131,7 +131,7 @@ class TF_Sequence_Data(Sequence_Data):
 		for tensorflow; med2vec + RCNN; 
 		use tensorflow's embedding_lookup() function
 	"""
-	def next(self, tf_embedding): 
+	def next(self, tf_embedding = None): 
 		### tf_embedding can be np.array 
 		bgn, endn = self.batch_id * self.batch_size, (self.batch_id+1) * self.batch_size 
 		self.batch_id += 1			
