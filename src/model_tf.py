@@ -240,12 +240,18 @@ class Weighted_Rcnn_Prototype(Weighted_Rcnn):
 		self._build()
 		self._open_session()		
 
+
+	'''
+	### old version
 	@staticmethod
 	def _prototype_layer(X_, prototype_vector_):
 		"""
 			X_: b, d   batch_size  , dim   ***** b is None owing to ***placeholder****
 			prototype_vector_: p, d   prototype_num, dim
 		"""
+
+
+
 		prototype_num = prototype_vector_.get_shape()[0]
 		for i in range(prototype_num):
 			y = X_ - tf.gather(prototype_vector_, [i])
@@ -256,8 +262,22 @@ class Weighted_Rcnn_Prototype(Weighted_Rcnn):
 				output = y 
 			else:
 				output = tf.concat([output, y], 0)
+		#out_lst = [tf.reshape(tf.norm(X_ - tf.gather(prototype_vector_,[i]), axis = 1), [1, -1]) for i in range(prototype_num)]
+		#output = tf.concat(out_lst, axis = 0)
 		output = tf.transpose(output, perm = [1,0])  ### p,b => b,p
 		return output
+	'''
+
+	### faster version, more simple 
+	@staticmethod
+	def _prototype_layer(X_, prototype_vector_):
+		prototype_num = prototype_vector_.get_shape()[0]
+		X_extend = tf.stack([X_] * prototype_num, axis = 1)   ### (?, p, d)   ? is batch_size
+		assert X_extend.get_shape()[1] == prototype_num
+		prototype_vector_extend = tf.expand_dims(prototype_vector_, 0)   
+		assert prototype_vector_extend.get_shape()[:2] == (1, prototype_num)
+		return tf.norm(X_extend - prototype_vector_extend, axis = 2)
+
 
 	def generate_prototype(self):
 		"""
@@ -272,7 +292,22 @@ class Weighted_Rcnn_Prototype(Weighted_Rcnn):
 		"""
 			TO DO LIST
 		"""
-		self.prototype_loss = tf.Variable(0.0, trainable = False) 
+		#self.prototype_loss = self.compute_prototype_loss(self.rnn_outputs, self.prototype_vector_)
+		self.prototype_loss = tf.Variable(0.0, trainable = False)
+
+
+	@staticmethod
+	def compute_prototype_loss(X_, P_):
+		"""
+			X_: ?, d
+			P_: p, d
+		"""
+		prototype_num = P_.get_shape()[0]
+		X_extend = tf.stack([X_] * prototype_num, axis = 1)  ### ?, p, d
+		P_extend = tf.expand_dims(P_, 0)   ### 1, p, d
+		X_dif = tf.norm(X_extend - P_extend, ord = 'euclidean', axis = 2)  ### ?, p
+		return tf.reduce_min(X_dif, axis = 1)
+
 
 
 	def _build_classify(self):
@@ -318,5 +353,7 @@ if __name__ == '__main__':
 	from config import get_RCNN_config
 	config = get_RCNN_config()
 	rcnn_base = Rcnn_Base(**config)
+
+
 
 

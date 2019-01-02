@@ -3,6 +3,7 @@ import numpy as np
 
 np.random.seed(4)
 tf.set_random_seed(1)
+from time import time 
 
 def test(model, All_data):
 	from sklearn.metrics import roc_auc_score

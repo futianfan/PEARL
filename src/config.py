@@ -89,7 +89,7 @@ def get_TF_weight_prototype_RCNN_config():
 
 	######
 	config['weight_file'] = ''
-	config['eta'] = 1e-3   #### prototype loss 
+	config['eta'] = 1e-7   #### prototype loss 
 	######
 
 
@@ -100,7 +100,7 @@ def get_TF_weight_prototype_RCNN_config():
 	config['admis_dim'] = 1867
 	config['max_length'] = 50
 	config['num_class'] = 2
-	config['batch_size'] = 8  ### 32, 256 
+	config['batch_size'] = 512  ### 8, 64, 512  
 	config['big_batch_size'] = 256
 	config['train_iter'] = 30000 ## int(2e3)
 
