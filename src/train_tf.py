@@ -59,14 +59,47 @@ def train_weight_rcnn():
 			print('Loss: {}, test AUC {}.'.format(str(total_loss / batch_num)[:5], str(auc)[:5]))
 			total_loss = 0 
 
+def train_weighted_post_prototype(assignment, weight):
+	from config import get_TF_weight_prototype_RCNN_config
+	from stream import TF_weighted_Sequence_Data 
+	from model_tf import Weighted_Rcnn_Prototype
+	config = get_TF_weight_prototype_RCNN_config()
+	trainData = TF_weighted_Sequence_Data(is_train = True, weight = weight, **config)
+	TestData = TF_weighted_Sequence_Data(is_train = False, weight = None, **config)
+	rcnn_base = Weighted_Rcnn_Prototype(assignment, **config)	
+
+	batch_num = trainData.batch_number
+	total_loss = 0
+	for i in range(config['train_iter']):
+		seq_embed, seq_len, label, weight = trainData.next()
+		rcnn_base.generate_prototype()
+		loss = rcnn_base.train(seq_embed, label, seq_len, weight)
+		total_loss += loss 
+		if i > 0 and i % batch_num == 0:
+			auc = test(rcnn_base, TestData)
+			print('Loss: {}, test AUC {}.'.format(str(total_loss / batch_num)[:5], str(auc)[:5]))
+			total_loss = 0 
+
+	reweight = rcnn_base.calculate_weight()  ### 
+	return reweight 
+
+
+def pearl():
+	from decision_tree import DT_learning
+	reweight = None
+	for i in range(5):
+		print(' Epoch {}:'.format(i))
+		assignment = DT_learning(reweight)
+		#train_post_prototype(assignment)
+		reweight = train_weighted_post_prototype(assignment, reweight)
 
 
 
 if __name__ == '__main__':
 	#train_rcnn()
-	train_weight_rcnn()
+	#train_weight_rcnn()
+	pearl()
 
-	
 
 
 

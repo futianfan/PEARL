@@ -150,12 +150,15 @@ class TF_Sequence_Data(Sequence_Data):
 		pass 
 
 class TF_weighted_Sequence_Data(TF_Sequence_Data):
-	def __init__(self, is_train = True, **config):
+	def __init__(self, is_train = True, weight = None, **config):
 		TF_Sequence_Data.__init__(self, is_train, **config)
 		### initial weight 
-		self.weight_file = config['weight_file'] 
-		if self.weight_file == '':
+		#self.weight_file = config['weight_file'] 
+		#if self.weight_file == '':
+		if weight == None:
 			self._weight = [1.0] * self.total_num
+		else:
+			self._weight = weight
 
 	@property
 	def weight(self):

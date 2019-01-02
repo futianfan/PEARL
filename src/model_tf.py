@@ -7,7 +7,7 @@ from collections import defaultdict
 __all__ = [
 	'Rcnn_Base',
 	'Weighted_Rcnn',
-	'Rcnn_Prototype',
+	'Weighted_Rcnn_Prototype',
 ]
 
 
@@ -199,9 +199,9 @@ class Weighted_Rcnn(Rcnn_Base):
 
 
 
-class Rcnn_Prototype(Weighted_Rcnn):
+class Weighted_Rcnn_Prototype(Weighted_Rcnn):
 
-"""
+	"""
 	config['weight_file'] = ''
 	config['eta'] = 1e-3   #### prototype loss 
 	######
@@ -229,13 +229,13 @@ class Rcnn_Prototype(Weighted_Rcnn):
 	config['bidirectional'] = True
 
 	config['LR'] = 1e-1		### 1e-1
-"""
+	"""
 	def __init__(self, assignment, **config):
 		self.__dict__.update(config)
 		self.embed_mat = _embed_file_2_numpy_embed_mat(config['embed_file'], config['admis_dim'])
 		### assignment
 		self.assignment = assignment
-		self.prototype_len = len(assignment)
+		self.prototype_num = len(assignment)
 		### assignment
 		self._build()
 		self._open_session()		
@@ -259,7 +259,7 @@ class Rcnn_Prototype(Weighted_Rcnn):
 		output = tf.transpose(output, perm = [1,0])  ### p,b => b,p
 		return output
 
-	def _generate_prototype(self):
+	def generate_prototype(self):
 		"""
 			TO DO list
 		"""
@@ -272,7 +272,7 @@ class Rcnn_Prototype(Weighted_Rcnn):
 		"""
 			TO DO LIST
 		"""
-		self.prototype_loss = tf.Variable(0, trainable = False) 
+		self.prototype_loss = tf.Variable(0.0, trainable = False) 
 
 
 	def _build_classify(self):
@@ -282,20 +282,35 @@ class Rcnn_Prototype(Weighted_Rcnn):
 		self.output_softmax = tf.nn.softmax(self.output_logits, axis = 1)
 		self.classify_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
 										labels=self.y, 
-										logits=self.output_logits))		
+										logits=self.output_logits) \
+										* self.weight \
+		)
 		
 
 	def _build(self):
 		self._build_placeholder()
 		self._build_rcnn()
+		self.generate_prototype()
 		self._build_prototype()
 		self._build_classify()
 
 		self.train_op = tf.train.GradientDescentOptimizer(learning_rate=self.LR).\
 						minimize(self.classify_loss + self.eta * self.prototype_loss)
 
+	def train(self, X, Y_1d, seqlen, weight):
+		Y_2d = _1dlabel_to_2dlabel(Y_1d)
+		loss, _ = self.sess.run([self.classify_loss, self.train_op], \
+			feed_dict = {self.seqlst:X, self.y:Y_2d, self.seqlen:seqlen, self.weight:weight})
+		return loss 		
 
-
+	'''
+	### evaluate function use *****Weighted_Rcnn.evaluate******
+	def evaluate(self, X, seqlen):
+		batch_size = len(seqlen)
+		weight = [1.0] * batch_size
+		return self.sess.run([self.output_softmax], \
+			feed_dict = {self.seqlst:X, self.seqlen:seqlen, self.weight:weight})		
+	'''
 
 
 
