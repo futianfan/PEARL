@@ -199,12 +199,103 @@ class Weighted_Rcnn(Rcnn_Base):
 
 
 
-class Rcnn_Prototype(Rcnn_Base):
+class Rcnn_Prototype(Weighted_Rcnn):
+
+"""
+	config['weight_file'] = ''
+	config['eta'] = 1e-3   #### prototype loss 
+	######
+
+	config['new_train_file'] = os.path.join(config['HF_folder'], 'train.npy')
+	config['new_test_file'] = os.path.join(config['HF_folder'], 'test.npy')
+
+	config['embed_dim'] = 100
+	config['admis_dim'] = 1867
+	config['max_length'] = 50
+	config['num_class'] = 2
+	config['batch_size'] = 8  ### 32, 256 
+	config['big_batch_size'] = 256
+	config['train_iter'] = 30000 ## int(2e3)
+
+	### Neural Network
+	config['cnn_kernel_size'] = 10  ### 10 => 15 improvement  
+	config['cnn_stride'] = 1 
+	config['cnn_out_channel'] = 150
+	config['maxpool_size'] = 9
+	config['maxpool_stride'] = 1
+	config['rnn_hidden_size'] = 50 
+	config['rnn_num_layer'] = 1
+	config['batch_first']  = True
+	config['bidirectional'] = True
+
+	config['LR'] = 1e-1		### 1e-1
+"""
+	def __init__(self, assignment, **config):
+		self.__dict__.update(config)
+		self.embed_mat = _embed_file_2_numpy_embed_mat(config['embed_file'], config['admis_dim'])
+		### assignment
+		self.assignment = assignment
+		self.prototype_len = len(assignment)
+		### assignment
+		self._build()
+		self._open_session()		
+
+	@staticmethod
+	def _prototype_layer(X_, prototype_vector_):
+		"""
+			X_: b, d   batch_size  , dim   ***** b is None owing to ***placeholder****
+			prototype_vector_: p, d   prototype_num, dim
+		"""
+		prototype_num = prototype_vector_.get_shape()[0]
+		for i in range(prototype_num):
+			y = X_ - tf.gather(prototype_vector_, [i])
+			#y = X_ - tf.gather(prototype_vector_, tf.Variable([i]))		
+			y = tf.norm(y, ord = 'euclidean', axis = 1)
+			y = tf.reshape(y, [1, -1])
+			if i == 0:
+				output = y 
+			else:
+				output = tf.concat([output, y], 0)
+		output = tf.transpose(output, perm = [1,0])  ### p,b => b,p
+		return output
+
+	def _generate_prototype(self):
+		"""
+			TO DO list
+		"""
+		self.prototype_vector_ = tf.Variable(tf.random_normal(shape = [self.prototype_num, self.rnn_hidden_size]))
+		### freeze the gradient. 
+		self.prototype_vector_ = tf.stop_gradient(self.prototype_vector_)
 
 	def _build_prototype(self):
+		self.prototype_output = self._prototype_layer(self.rnn_outputs, self.prototype_vector_)
+		"""
+			TO DO LIST
+		"""
+		self.prototype_loss = tf.Variable(0, trainable = False) 
 
-		self.prototype_loss = 0
+
+	def _build_classify(self):
+		weight_fc = tf.Variable(tf.random_normal(shape = [self.prototype_num, self.num_class]), dtype = tf.float32)
+		bias_fc = tf.Variable(tf.zeros(shape = self.num_class), dtype = tf.float32)
+		self.output_logits = tf.matmul(self.prototype_output, weight_fc) + bias_fc
+		self.output_softmax = tf.nn.softmax(self.output_logits, axis = 1)
+		self.classify_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
+										labels=self.y, 
+										logits=self.output_logits))		
 		
+
+	def _build(self):
+		self._build_placeholder()
+		self._build_rcnn()
+		self._build_prototype()
+		self._build_classify()
+
+		self.train_op = tf.train.GradientDescentOptimizer(learning_rate=self.LR).\
+						minimize(self.classify_loss + self.eta * self.prototype_loss)
+
+
+
 
 
 
