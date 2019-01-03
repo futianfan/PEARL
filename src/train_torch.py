@@ -278,7 +278,7 @@ if __name__ == '__main__':
 	reweight = None
 	for i in range(5):
 		print(' Epoch {}:'.format(i))
-		assignment = DT_learning(reweight)
+		assignment = DT_learning(reweight, i)
 		#train_post_prototype(assignment)
 		reweight = train_weighted_post_prototype(assignment)
 

@@ -278,12 +278,50 @@ class Weighted_Rcnn_Prototype(Weighted_Rcnn):
 		assert prototype_vector_extend.get_shape()[:2] == (1, prototype_num)
 		return tf.norm(X_extend - prototype_vector_extend, axis = 2)
 
+	def compute_mean_rcnn_as_prototype(self, dataseq, seqlen):
+		"""
+			only seq_embed and seqlen are needed
+		"""
+		leng = len(seqlen)
+		batch_num = int(np.ceil(leng / self.batch_size))
+		for i in range(batch_num): 
+			bgn, endn = i * self.batch_size, (i + 1) * self.batch_size
 
+
+	
+	### new version
+	'''def generate_prototype(self):
+		"""
+		self.prototype_vector_ = tf.Variable(tf.random_normal(shape = [self.prototype_num, self.rnn_hidden_size]))
+		for i in range(self.prototype_num):
+			assg = self.assignment[i]
+			seqembed = [all_seq[j] for j in assg]
+			seqlen = [all_seqlen[j] for j in assg]
+			#pv = self.compute_mean_rcnn_as_prototype()
+			self.prototype_vector_ = tf.scatter_update(self.prototype_vector_, [i], pv)
+		"""
+		### freeze the gradient. 
+		self.prototype_vector_ = tf.stop_gradient(self.prototype_vector_)
+	'''
+
+
+
+	### old version
 	def generate_prototype(self):
 		"""
 			TO DO list
 		"""
+		'''
 		self.prototype_vector_ = tf.Variable(tf.random_normal(shape = [self.prototype_num, self.rnn_hidden_size]))
+		for i in range(self.prototype_num):
+			assg = self.assignment[i]
+			seqembed = [all_seq[j] for j in assg]
+			seqlen = [all_seqlen[j] for j in assg]
+			#pv = self.compute_mean_rcnn_as_prototype()
+			self.prototype_vector_ = tf.scatter_update(self.prototype_vector_, [i], pv)
+		'''
+
+		self.prototype_vector_ = tf.Variable(tf.random_normal([self.prototype_num, self.rnn_hidden_size]), trainable = False)
 		### freeze the gradient. 
 		self.prototype_vector_ = tf.stop_gradient(self.prototype_vector_)
 
@@ -301,12 +339,13 @@ class Weighted_Rcnn_Prototype(Weighted_Rcnn):
 		"""
 			X_: ?, d
 			P_: p, d
+			return [?]
 		"""
 		prototype_num = P_.get_shape()[0]
 		X_extend = tf.stack([X_] * prototype_num, axis = 1)  ### ?, p, d
 		P_extend = tf.expand_dims(P_, 0)   ### 1, p, d
 		X_dif = tf.norm(X_extend - P_extend, ord = 'euclidean', axis = 2)  ### ?, p
-		return tf.reduce_min(X_dif, axis = 1)
+		return  tf.reduce_mean(tf.reduce_min(X_dif, axis = 1))  ### ?,p => ? -> 
 
 
 
