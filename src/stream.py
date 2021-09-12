@@ -28,11 +28,11 @@ class Sequence_Data(object):
 		self.label = list(map(lambda x:1 if x=='True' else  0, \
 			[line.split('\t')[0] for line in lines]))
 		self.sequence = list(map(lambda x: [int(i) for i in x.split()], \
-			[line.split('\t')[2] for line in lines]))
+			[line.split('\t')[1] for line in lines]))
 		def f1(timestamp_str):
 			return [int(i) for i in timestamp_str.split()]
 		self.timestamp = list(map(f1, \
-			[line.split('\t')[3] for line in lines]))
+			[line.split('\t')[2] for line in lines]))
 
 		#### cut-off max_length
 		#self.sequence = self.sequence[-self.max_length:]
@@ -311,10 +311,6 @@ if __name__ == '__main__':
 		seq_embed, seq_len, label = trainData.next(embedding)
 		print(seq_embed.get_shape().as_list())			
 
-
-
-
-	pass
 
 
 

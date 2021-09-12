@@ -8,7 +8,7 @@ def get_RCNN_config():
 	config['train_file'] = os.path.join(config['HF_folder'], 'training_data_1.txt')
 	config['test_file'] = os.path.join(config['HF_folder'], 'test_data_1.txt') 
 	config['embed_file'] = os.path.join(config['HF_folder'], 'training_model_by_word2vec_1.vector')
-	assert os.path.exists(config['train_file'])
+	# assert os.path.exists(config['train_file'])
 
 	config['new_train_file'] = os.path.join(config['HF_folder'], 'train.npy')
 	config['new_test_file'] = os.path.join(config['HF_folder'], 'test.npy')
@@ -47,7 +47,7 @@ def get_TF_RCNN_config():
 	config['train_file'] = os.path.join(config['HF_folder'], 'training_data_1.txt')
 	config['test_file'] = os.path.join(config['HF_folder'], 'test_data_1.txt') 
 	config['embed_file'] = os.path.join(config['HF_folder'], 'training_model_by_word2vec_1.vector')
-	assert os.path.exists(config['train_file'])
+	# assert os.path.exists(config['train_file'])
 
 	config['new_train_file'] = os.path.join(config['HF_folder'], 'train.npy')
 	config['new_test_file'] = os.path.join(config['HF_folder'], 'test.npy')

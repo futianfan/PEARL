@@ -1,7 +1,13 @@
-PEARL
-=============================
+# PEARL
 
-data/
+
+
+## data 
+
+`data/`: data folder
+
+`src/stream.py`: process data
+
 
 |------	heart_failure/
 
@@ -12,27 +18,24 @@ data/
 
 
 
-==============================
+## config 
 
-
-data + model
-
-(0): config.py: 
-	data,nn,dt,main,  for nn: train/dev/test
-
-(1): stream.py:
-	nn,dt, initial_weight=1.0
-
-(2): decision_tree.py: 
-	decision-tree => interpretable rule
-	input:
-	output: rule + assignment
-(3): nn_model.py, nn_train.py(train+test+evaluate), nn_run.py(including reweight) 
-	input: assignment results based on decision tree.
-	output: accuracy, weight 
-(4): main.py
-	python nn_train.py
+configuration script: `src/config.py` 
 	
 
+## model 
+
+`src/decision_tree.py`: decision-tree for interpretable rule
+
+`src/model_torch.py`: NN model (Pytorch) 
+
+## train 
+
+```bash
+python src/train_torch.py
+```
 
 
+
+## Contact
+Tianfan Fu (futianfan@gmail.com)
