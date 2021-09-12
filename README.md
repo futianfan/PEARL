@@ -9,19 +9,10 @@
 `src/stream.py`: process data
 
 
-|------	heart_failure/
-
-|------	mimic3/: 
-
-
-./EHR/interpretable_healthcare/mimicIII2/data
-
-
-
 ## config 
 
-configuration script: `src/config.py` 
-	
+`src/config.py`: configuration 
+
 
 ## model 
 
