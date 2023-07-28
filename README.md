@@ -1,7 +1,7 @@
-# PEARL
+# PEARL: Prototype Learning via Rule Learning
 
 
-## conda 
+## 🚀 Installation 
 
 ```bash
 conda create -n pearl python=3.7 
@@ -11,19 +11,19 @@ pip install scikit-learn
 pip install matplotlib 
 ```
 
-## data 
+## 📊 Data 
 
 `data/`: data folder
 
 `src/stream.py`: process data
 
 
-## config 
+## ⚙️ Configuration
 
 `src/config.py`: configuration 
 
 
-## model 
+## 🤖 Model 
 
 `src/decision_tree.py`: decision-tree for interpretable rule
 
@@ -37,5 +37,5 @@ python src/train_torch.py
 
 
 
-## Contact
+## 📞 Contact
 Tianfan Fu (futianfan@gmail.com)
